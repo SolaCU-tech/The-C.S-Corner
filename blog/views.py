@@ -12,7 +12,18 @@ from .models import Post, Comment, Reaction, Profile, Follow, PostRead
 from .forms import PostForm, CommentForm, ProfileForm
 from django.urls import reverse
 from django.utils import timezone
+from django.template.defaultfilters import truncatewords
 from datetime import date
+
+
+def _absolute_media_url(request, url):
+    """Cloudinary URLs are already absolute (https://...); local dev
+    media URLs are relative and need the current host prepended. Only
+    the latter should go through build_absolute_uri, or an already-
+    absolute URL would get corrupted."""
+    if url.startswith('http://') or url.startswith('https://'):
+        return url
+    return request.build_absolute_uri(url)
 
 LATEST_INITIAL = 5
 POPULAR_INITIAL = 3
@@ -165,6 +176,8 @@ def post_detail(request, slug):
         'user_reaction': user_reaction,
         'likers': likers,
         'likers_total': likers_total,
+        'og_description': truncatewords(post.text, 30),
+        'og_image_url': _absolute_media_url(request, post.image.url) if post.image else '',
     })
 
 

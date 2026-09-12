@@ -12,6 +12,18 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
+    {% block meta_tags %}
+    <meta property="og:site_name" content="The C.S Corner">
+    <meta property="og:title" content="The C.S Corner">
+    <meta property="og:description"
+        content="A community blog for CS students &mdash; tutorials, ideas, and dad jokes.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="The C.S Corner">
+    <meta name="twitter:description"
+        content="A community blog for CS students &mdash; tutorials, ideas, and dad jokes.">
+    {% endblock %}
     <script>
         (function () {
             var saved = localStorage.getItem('csCornerTheme');

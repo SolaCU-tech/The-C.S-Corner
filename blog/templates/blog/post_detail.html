@@ -1,4 +1,29 @@
 {% extends 'blog/base.html' %}
+
+{% block meta_tags %}
+{% if not post.is_removed %}
+<meta property="og:site_name" content="The C.S Corner">
+<meta property="og:title" content="{{ post.title }}">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+{% if og_image_url %}
+<meta property="og:image" content="{{ og_image_url }}">
+<meta name="twitter:card" content="summary_large_image">
+{% else %}
+<meta name="twitter:card" content="summary">
+{% endif %}
+<meta name="twitter:title" content="{{ post.title }}">
+<meta name="twitter:description" content="{{ og_description }}">
+{% if og_image_url %}
+<meta name="twitter:image" content="{{ og_image_url }}">
+{% endif %}
+{% else %}
+<meta property="og:title" content="Post removed">
+<meta property="og:description" content="This post was removed by a moderator.">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <article>
     <h1>{{ post.title }}</h1>
@@ -32,16 +57,20 @@
                 &#128078; <span>{{ dislike_count }}</span>
             </button>
         </form>
+    </div>
 
-        <div class="share-menu">
-            <button type="button" class="reaction-btn share-btn" id="share-btn">&#128279; Share</button>
-            <div class="share-dropdown" id="share-dropdown">
+    <p class="post-actions">
+        <span class="share-menu">
+            <button type="button" class="share-btn" id="share-btn" data-snippet="{{ og_description }}">Share</button>
+            <span class="share-dropdown" id="share-dropdown">
                 <button type="button" class="share-option" id="share-copy-link">Copy link</button>
                 <a href="#" class="share-option" id="share-whatsapp" target="_blank" rel="noopener">Share to
                     WhatsApp</a>
-            </div>
-        </div>
-    </div>
+                <a href="#" class="share-option" id="share-telegram" target="_blank" rel="noopener">Share to
+                    Telegram</a>
+            </span>
+        </span>
+    </p>
 
     {% if likers is not None %}
     <div class="likers-list">
@@ -173,12 +202,18 @@
         var dropdown = document.getElementById('share-dropdown');
         var copyBtn = document.getElementById('share-copy-link');
         var whatsappLink = document.getElementById('share-whatsapp');
+        var telegramLink = document.getElementById('share-telegram');
         if (!shareBtn || !dropdown) return;
 
         var postUrl = window.location.href;
         var postTitle = document.querySelector('article h1').textContent.trim();
+        var snippet = shareBtn.dataset.snippet || '';
+        var shareText = snippet ? postTitle + '\n\n' + snippet : postTitle;
+
         whatsappLink.href = 'https://wa.me/?text=' +
-            encodeURIComponent(postTitle + ' ' + postUrl);
+            encodeURIComponent(shareText + '\n\n' + postUrl);
+        telegramLink.href = 'https://t.me/share/url?url=' +
+            encodeURIComponent(postUrl) + '&text=' + encodeURIComponent(shareText);
 
         shareBtn.addEventListener('click', function (event) {
             event.stopPropagation();
