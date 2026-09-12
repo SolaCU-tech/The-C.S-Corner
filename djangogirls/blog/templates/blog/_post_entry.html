@@ -1,0 +1,12 @@
+<article class="timeline-entry">
+    <span class="timeline-dot"></span>
+    <h3><a href="{% url 'post_detail' slug=post.slug %}">{{ post.title }}</a></h3>
+    <time datetime="{{ post.published_date }}">{{ post.published_date|date:"M d, Y" }} &middot; by
+        {% include 'blog/_author_byline.html' %}
+        &middot; {{ post.view_count }} view{{ post.view_count|pluralize }}</time>
+    {% if post.image %}
+    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="post-thumb">
+    {% endif %}
+    <p>{{ post.text|truncatewords:30|linebreaks }}</p>
+    <a href="{% url 'post_detail' slug=post.slug %}" class="read-more">Read more &rarr;</a>
+</article>

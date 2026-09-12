@@ -1,0 +1,149 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+
+<div class="profile-header">
+    <div class="profile-header-top">
+        {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}" alt="{{ profile_user.username }}" class="profile-avatar">
+        {% else %}
+        <div class="profile-avatar profile-avatar-placeholder">{{ profile_user.username|slice:":1"|upper }}</div>
+        {% endif %}
+
+        <div class="profile-identity">
+            <h1>{{ profile_user.username }}{% if profile_user.is_staff %} <span class="mod-badge" title="Moderator">[MOD]</span>{% endif %}</h1>
+            {% if profile.display_name and profile.display_name != profile_user.username %}
+            <p class="profile-display-name">{{ profile.display_name }}</p>
+            {% endif %}
+            {% if profile.university or profile.current_level %}
+            <p class="profile-academic">
+                {% if profile.university %}{{ profile.university }}{% endif %}
+                {% if profile.university and profile.current_level %} &middot; {% endif %}
+                {% if profile.current_level %}{{ profile.current_level }}{% endif %}
+            </p>
+            {% endif %}
+            <p class="profile-meta">{{ post_count }} published post{{ post_count|pluralize }} &middot; joined
+                {{ profile_user.date_joined|date:"M Y" }}</p>
+        </div>
+
+        <div class="profile-actions">
+            {% if user == profile_user %}
+            <a href="{% url 'profile_edit' %}" class="top-menu">Edit profile</a>
+            {% elif user.is_authenticated %}
+            <form method="POST" action="{% url 'follow_toggle' username=profile_user.username %}">
+                {% csrf_token %}
+                <button type="submit" class="top-menu {% if is_following %}top-menu-primary{% endif %}">
+                    {% if is_following %}Following{% else %}+ Follow{% endif %}
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if profile.bio %}
+    <p class="profile-bio">{{ profile.bio }}</p>
+    {% endif %}
+
+    <div class="profile-follow-counts">
+        <span><strong>{{ followers_count }}</strong> follower{{ followers_count|pluralize }}</span>
+        <span><strong>{{ following_count }}</strong> following</span>
+    </div>
+
+    {% if followers_preview %}
+    <div class="followers-list">
+        {% for follower in followers_preview %}
+        <a href="{% url 'user_profile' username=follower.username %}" class="follower-chip">
+            {% if follower.profile.avatar %}
+            <img src="{{ follower.profile.avatar.url }}" alt="{{ follower.username }}" class="follower-chip-avatar">
+            {% else %}
+            <span class="follower-chip-avatar follower-chip-placeholder">{{ follower.username|slice:":1"|upper }}</span>
+            {% endif %}
+            {{ follower.username }}
+        </a>
+        {% endfor %}
+        {% if followers_count > followers_preview|length %}
+        <span class="followers-more">+{{ followers_count|add:"-20" }} more</span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% if total_views is not None %}
+<section class="engagement-section">
+    <h2 class="section-heading">Engagement</h2>
+
+    <div class="engagement-summary">
+        <div class="engagement-stat">
+            <p class="engagement-stat-value">{{ total_views }}</p>
+            <p class="engagement-stat-label">total view{{ total_views|pluralize }}</p>
+        </div>
+        <div class="engagement-stat">
+            <p class="engagement-stat-value">{{ total_likes }}</p>
+            <p class="engagement-stat-label">total like{{ total_likes|pluralize }}</p>
+        </div>
+        <div class="engagement-stat">
+            <p class="engagement-stat-value">{{ total_comments }}</p>
+            <p class="engagement-stat-label">total comment{{ total_comments|pluralize }}</p>
+        </div>
+    </div>
+
+    <div class="engagement-highlights">
+        {% if most_popular_post %}
+        <a href="{% url 'post_detail' slug=most_popular_post.slug %}" class="engagement-highlight-card">
+            <p class="engagement-highlight-label">Most viewed</p>
+            <p class="engagement-highlight-title">{{ most_popular_post.title }}</p>
+            <p class="engagement-highlight-metric">{{ most_popular_post.view_count }} view{{ most_popular_post.view_count|pluralize }}</p>
+        </a>
+        {% endif %}
+        {% if most_liked_post %}
+        <a href="{% url 'post_detail' slug=most_liked_post.slug %}" class="engagement-highlight-card">
+            <p class="engagement-highlight-label">Most liked</p>
+            <p class="engagement-highlight-title">{{ most_liked_post.title }}</p>
+            <p class="engagement-highlight-metric">{{ most_liked_post.like_total }} like{{ most_liked_post.like_total|pluralize }}</p>
+        </a>
+        {% endif %}
+        {% if most_commented_post %}
+        <a href="{% url 'post_detail' slug=most_commented_post.slug %}" class="engagement-highlight-card">
+            <p class="engagement-highlight-label">Most commented</p>
+            <p class="engagement-highlight-title">{{ most_commented_post.title }}</p>
+            <p class="engagement-highlight-metric">{{ most_commented_post.comment_total }} comment{{ most_commented_post.comment_total|pluralize }}</p>
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="interaction-chart">
+        <p class="interaction-chart-title">Interactions (comments + reactions) over the last 12 months</p>
+        <svg viewBox="0 0 380 120" class="interaction-chart-svg">
+            <line x1="8" y1="90" x2="372" y2="90" class="interaction-chart-baseline" />
+            {% for bucket in interaction_buckets %}
+            <rect x="{{ bucket.x }}" y="{{ bucket.y }}" width="22" height="{{ bucket.height }}" rx="3">
+                <title>{{ bucket.label }}: {{ bucket.count }}</title>
+            </rect>
+            <text x="{{ bucket.label_x }}" y="104" text-anchor="middle" class="interaction-chart-label">{{ bucket.label }}</text>
+            {% endfor %}
+        </svg>
+    </div>
+</section>
+{% endif %}
+
+<h2 class="section-heading">Posts</h2>
+<div class="timeline">
+    {% for post in posts_page %}
+    {% include 'blog/_post_entry.html' %}
+    {% empty %}
+    <p class="no-comments">{{ profile_user.username }} hasn't published anything yet.</p>
+    {% endfor %}
+</div>
+
+{% if posts_page.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="Profile post pages">
+    {% if posts_page.has_previous %}
+    <a href="?page={{ posts_page.previous_page_number }}" class="page-link">&larr; Prev</a>
+    {% endif %}
+    <span class="page-status">Page {{ posts_page.number }} of {{ posts_page.paginator.num_pages }}</span>
+    {% if posts_page.has_next %}
+    <a href="?page={{ posts_page.next_page_number }}" class="page-link">Next &rarr;</a>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+
+{% if not user.is_authenticated %}
+<div class="guest-banner">
+    You're browsing as a guest — you can read snippets below, but opening a full post needs an account.
+    <a href="{% url 'signup' %}">Sign up</a> or <a href="{% url 'login' %}">log in</a> to keep reading.
+</div>
+{% endif %}
+
+{% if unread_posts %}
+<section class="post-section">
+    <h2 class="section-heading">Unread from people you follow</h2>
+    <div class="timeline" id="unread-timeline">
+        {% for post in unread_posts %}
+        {% include 'blog/_post_entry.html' %}
+        {% endfor %}
+    </div>
+    {% if has_more_unread %}
+    <button type="button" class="load-more-btn" id="load-more-unread">Load more</button>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if popular_posts %}
+<section class="post-section">
+    <h2 class="section-heading">Popular</h2>
+    <div class="timeline" id="popular-timeline">
+        {% for post in popular_posts %}
+        {% include 'blog/_post_entry.html' %}
+        {% endfor %}
+    </div>
+    {% if has_more_popular %}
+    <button type="button" class="load-more-btn" id="load-more-popular">Load more</button>
+    {% endif %}
+</section>
+{% endif %}
+
+<section class="post-section">
+    <h2 class="section-heading">Latest</h2>
+    <div class="timeline" id="latest-timeline">
+        {% for post in latest_posts %}
+        {% include 'blog/_post_entry.html' %}
+        {% empty %}
+        <p>No posts published yet.</p>
+        {% endfor %}
+    </div>
+    {% if has_more_latest %}
+    <button type="button" class="load-more-btn" id="load-more-latest">Load more</button>
+    {% endif %}
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        function initLoadMore(type, buttonId, listId, startOffset) {
+            var btn = document.getElementById(buttonId);
+            if (!btn) return;
+            var offset = startOffset;
+
+            btn.addEventListener('click', function () {
+                btn.disabled = true;
+                btn.textContent = 'Loading...';
+
+                fetch("{% url 'post_more' %}?type=" + type + "&offset=" + offset)
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        document.getElementById(listId).insertAdjacentHTML('beforeend', data.html);
+                        offset += data.count;
+                        if (data.has_more) {
+                            btn.disabled = false;
+                            btn.textContent = 'Load more';
+                        } else {
+                            btn.remove();
+                        }
+                    })
+                    .catch(function () {
+                        btn.disabled = false;
+                        btn.textContent = 'Load more — try again';
+                    });
+            });
+        }
+
+        initLoadMore('latest', 'load-more-latest', 'latest-timeline', {{ latest_posts|length }});
+        initLoadMore('popular', 'load-more-popular', 'popular-timeline', {{ popular_posts|length }});
+        initLoadMore('unread', 'load-more-unread', 'unread-timeline', {{ unread_posts|default:""|length }});
+    })();
+</script>
+{% endblock %}

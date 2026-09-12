@@ -1,0 +1,282 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The C.S Corner</title>
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    {% block meta_tags %}
+    <meta property="og:site_name" content="The C.S Corner">
+    <meta property="og:title" content="The C.S Corner">
+    <meta property="og:description"
+        content="A community blog for CS students &mdash; tutorials, ideas, and dad jokes.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="The C.S Corner">
+    <meta name="twitter:description"
+        content="A community blog for CS students &mdash; tutorials, ideas, and dad jokes.">
+    {% endblock %}
+    <script>
+        (function () {
+            var saved = localStorage.getItem('csCornerTheme');
+            if (saved === 'espresso') {
+                document.documentElement.setAttribute('data-theme', 'espresso');
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/blog.css' %}">
+</head>
+
+<body>
+    <div class="glyph-field" aria-hidden="true">
+        <span class="glyph" style="left:6%; animation-delay:0s;">{ }</span>
+        <span class="glyph" style="left:16%; animation-delay:-4s;">01</span>
+        <span class="glyph" style="left:27%; animation-delay:-11s;">&lt;/&gt;</span>
+        <span class="glyph" style="left:40%; animation-delay:-2s;">( )</span>
+        <span class="glyph" style="left:52%; animation-delay:-8s;">;</span>
+        <span class="glyph" style="left:64%; animation-delay:-14s;">10</span>
+        <span class="glyph" style="left:75%; animation-delay:-6s;">[ ]</span>
+        <span class="glyph" style="left:87%; animation-delay:-17s;">=&gt;</span>
+        <span class="glyph" style="left:94%; animation-delay:-10s;">{ }</span>
+    </div>
+
+    <div class="floaty-field" aria-hidden="true">
+        <div class="floaty floaty-yellow" style="left:4%; top:12%; animation-delay:0s;">
+            <svg viewBox="0 0 64 64" width="76" height="76">
+                <rect x="6" y="6" width="70" height="70" rx="6" fill="#ffd23f" stroke="#2a2000" stroke-width="2.5" />
+                <rect x="16" y="16" width="32" height="20" rx="2" fill="#2a2000" />
+                <circle cx="50" cy="12" r="3.5" fill="#2a2000" />
+                <rect x="14" y="44" width="10" height="6" rx="1.5" fill="#2a2000" />
+                <rect x="28" y="44" width="10" height="6" rx="1.5" fill="#2a2000" />
+                <rect x="42" y="44" width="8" height="6" rx="1.5" fill="#2a2000" />
+            </svg>
+        </div>
+        <div class="floaty floaty-red" style="left:88%; top:18%; animation-delay:-5s;">
+            <svg viewBox="0 0 64 64" width="66" height="66">
+                <rect x="10" y="10" width="60" height="60" rx="8" fill="#ff5757" stroke="#3a0a0a" stroke-width="2.5" />
+                <rect x="20" y="20" width="24" height="24" rx="4" fill="#3a0a0a" />
+                <line x1="2" y1="20" x2="10" y2="20" stroke="#3a0a0a" stroke-width="3" />
+                <line x1="2" y1="32" x2="10" y2="32" stroke="#3a0a0a" stroke-width="3" />
+                <line x1="2" y1="44" x2="10" y2="44" stroke="#3a0a0a" stroke-width="3" />
+                <line x1="54" y1="20" x2="62" y2="20" stroke="#3a0a0a" stroke-width="3" />
+                <line x1="54" y1="32" x2="62" y2="32" stroke="#3a0a0a" stroke-width="3" />
+                <line x1="54" y1="44" x2="62" y2="44" stroke="#3a0a0a" stroke-width="3" />
+            </svg>
+        </div>
+        <div class="floaty floaty-blue" style="left:10%; top:70%; animation-delay:-10s;">
+            <svg viewBox="0 0 64 64" width="70" height="70">
+                <rect x="8" y="18" width="48" height="32" rx="4" fill="#4ea8ff" stroke="#04203f" stroke-width="2.5" />
+                <rect x="14" y="24" width="36" height="14" rx="2" fill="#04203f" />
+                <circle cx="20" cy="44" r="2.5" fill="#04203f" />
+                <circle cx="30" cy="44" r="2.5" fill="#04203f" />
+                <circle cx="40" cy="44" r="2.5" fill="#04203f" />
+                <rect x="24" y="50" width="16" height="8" fill="#4ea8ff" stroke="#04203f" stroke-width="2" />
+                <rect x="16" y="58" width="32" height="4" rx="2" fill="#04203f" />
+            </svg>
+        </div>
+        <div class="floaty floaty-yellow" style="left:78%; top:66%; animation-delay:-3s;">
+            <svg viewBox="0 0 64 64" width="60" height="60">
+                <path d="M32 4 L38 20 L56 20 L42 30 L48 48 L32 38 L16 48 L22 30 L8 20 L26 20 Z" fill="#ffd23f"
+                    stroke="#2a2000" stroke-width="2" stroke-linejoin="round" />
+                <circle cx="32" cy="30" r="6" fill="#2a2000" />
+            </svg>
+        </div>
+        <div class="floaty floaty-red" style="left:48%; top:6%; animation-delay:-7s;">
+            <svg viewBox="0 0 64 64" width="54" height="54">
+                <path d="M12 32 h10 M42 32 h10 M32 12 v10 M32 42 v10" stroke="#ff5757" stroke-width="4"
+                    stroke-linecap="round" />
+                <rect x="22" y="22" width="20" height="20" rx="4" fill="#ff5757" stroke="#3a0a0a"
+                    stroke-width="2.5" />
+                <circle cx="12" cy="32" r="3" fill="#ff5757" />
+                <circle cx="52" cy="32" r="3" fill="#ff5757" />
+                <circle cx="32" cy="12" r="3" fill="#ff5757" />
+                <circle cx="32" cy="52" r="3" fill="#ff5757" />
+            </svg>
+        </div>
+        <div class="floaty floaty-blue" style="left:58%; top:80%; animation-delay:-13s;">
+            <svg viewBox="0 0 64 64" width="62" height="62">
+                <circle cx="32" cy="32" r="10" fill="#4ea8ff" stroke="#04203f" stroke-width="2.5" />
+                <g stroke="#4ea8ff" stroke-width="3" stroke-linecap="round">
+                    <line x1="32" y1="4" x2="32" y2="14" />
+                    <line x1="32" y1="50" x2="32" y2="60" />
+                    <line x1="4" y1="32" x2="14" y2="32" />
+                    <line x1="50" y1="32" x2="60" y2="32" />
+                    <line x1="12" y1="12" x2="19" y2="19" />
+                    <line x1="45" y1="45" x2="52" y2="52" />
+                    <line x1="52" y1="12" x2="45" y2="19" />
+                    <line x1="19" y1="45" x2="12" y2="52" />
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <header class="page-header">
+        <div class="container">
+            <h1><a href="{% url 'post_list' %}"><span class="typed-title">The C.S Corner</span></a></h1>
+            <p class="prompt-line"><span class="prompt-user">cs@blog</span><span class="prompt-symbol">:~$</span>
+                <span class="prompt-command">cat posts/</span><span class="cursor">&nbsp;</span></p>
+
+            <form method="GET" action="{% url 'search' %}" class="search-form">
+                <input type="text" name="q" placeholder="search posts or people..." value="{{ request.GET.q }}"
+                    class="search-input" aria-label="Search posts">
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+
+            <nav class="top-menu-bar">
+                <a href="{% url 'post_list' %}" class="top-menu">Home</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'post_new' %}" class="top-menu">+ New Post</a>
+                <a href="{% url 'post_draft_list' %}" class="top-menu">Drafts</a>
+
+                <div class="profile-menu">
+                    <button type="button" class="profile-trigger" aria-haspopup="true" aria-expanded="false">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="" class="profile-trigger-avatar">
+                        {% else %}
+                        <span class="profile-trigger-avatar profile-avatar-placeholder">{{ user.username|slice:":1"|upper }}</span>
+                        {% endif %}
+                        {{ user.username }}
+                        <span class="profile-chevron" aria-hidden="true">&#9662;</span>
+                    </button>
+
+                    <div class="profile-dropdown">
+                        <div class="profile-card">
+                            {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="" class="profile-card-avatar">
+                            {% else %}
+                            <span class="profile-card-avatar profile-avatar-placeholder">{{ user.username|slice:":1"|upper }}</span>
+                            {% endif %}
+                            <div class="profile-card-identity">
+                                <p class="profile-card-username">{{ user.username }}{% if user.is_staff %} <span class="mod-badge" title="Moderator">[MOD]</span>{% endif %}</p>
+                                {% if user.profile.display_name and user.profile.display_name != user.username %}
+                                <p class="profile-card-name">{{ user.profile.display_name }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="profile-card-stats">
+                            <span><strong>{{ nav_post_count }}</strong> post{{ nav_post_count|pluralize }}</span>
+                            <span><strong>{{ nav_followers_count }}</strong> follower{{ nav_followers_count|pluralize }}</span>
+                            <span><strong>{{ nav_following_count }}</strong> following</span>
+                        </div>
+
+                        <div class="profile-card-links">
+                            <a href="{% url 'user_profile' username=user.username %}">View full profile &rarr;</a>
+                        </div>
+                        <form method="POST" action="{% url 'logout' %}" class="profile-logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="profile-logout-btn">Log out</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'signup' %}" class="top-menu">Sign up</a>
+                <a href="{% url 'login' %}" class="top-menu top-menu-primary">Log in</a>
+                {% endif %}
+
+                <div class="theme-toggle-wrap">
+                    <span class="theme-toggle-label" id="theme-toggle-label">Latte</span>
+                    <button type="button" class="theme-toggle-switch" id="theme-toggle-switch" role="switch"
+                        aria-checked="false" aria-label="Switch between Latte and Espresso color themes">
+                        <span class="theme-toggle-knob"></span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="tidbit-banner">
+        <div class="container">
+            <span class="tidbit-label">// </span>{{ cs_tidbit }}
+        </div>
+    </div>
+
+    <div class="layout">
+        <aside class="layout-aside">
+            <h2 class="section-heading">Latest News</h2>
+            <ul class="news-list">
+                {% for item in tech_news %}
+                <li><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a></li>
+                {% empty %}
+                <li class="news-empty">Couldn't load news right now — check back soon.</li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <main class="layout-main">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <script>
+        (function () {
+            var menu = document.querySelector('.profile-menu');
+            if (!menu) return;
+            var trigger = menu.querySelector('.profile-trigger');
+
+            function closeMenu() {
+                menu.classList.remove('open');
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+
+            trigger.addEventListener('click', function (event) {
+                event.stopPropagation();
+                var isOpen = menu.classList.toggle('open');
+                trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!menu.contains(event.target)) closeMenu();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') closeMenu();
+            });
+        })();
+    </script>
+
+    <script>
+        (function () {
+            var toggleBtn = document.getElementById('theme-toggle-switch');
+            var label = document.getElementById('theme-toggle-label');
+            if (!toggleBtn || !label) return;
+
+            function applyLabel(theme) {
+                var isEspresso = theme === 'espresso';
+                label.textContent = isEspresso ? 'Espresso' : 'Latte';
+                toggleBtn.setAttribute('aria-checked', isEspresso ? 'true' : 'false');
+                toggleBtn.classList.toggle('is-espresso', isEspresso);
+            }
+
+            var current = document.documentElement.getAttribute('data-theme') === 'espresso' ? 'espresso' : 'latte';
+            applyLabel(current);
+
+            toggleBtn.addEventListener('click', function () {
+                current = current === 'espresso' ? 'latte' : 'espresso';
+                if (current === 'espresso') {
+                    document.documentElement.setAttribute('data-theme', 'espresso');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+                localStorage.setItem('csCornerTheme', current);
+                applyLabel(current);
+            });
+        })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

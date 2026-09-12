@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: cs-corner
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn mysite.wsgi:application"
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      # Set these two yourself in the Render dashboard after the
+      # blueprint is created — they hold real credentials and
+      # shouldn't be committed to the repo:
+      #   DATABASE_URL   -> your Neon connection string
+      #   CLOUDINARY_URL -> from your Cloudinary dashboard

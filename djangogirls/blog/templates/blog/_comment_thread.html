@@ -1,0 +1,52 @@
+<div class="comment" id="comment-{{ comment.pk }}">
+    <div class="comment-meta">
+        <a href="{% url 'user_profile' username=comment.author.username %}" class="comment-author">{{ comment.author.username }}</a>{% if comment.author.is_staff %}
+        <span class="mod-badge" title="Moderator">[MOD]</span>{% endif %}
+        <time datetime="{{ comment.created_date }}">{{ comment.created_date|date:"M d, Y H:i" }}</time>
+    </div>
+    {% if comment.is_removed %}
+    <p class="removed-notice removed-notice-inline">[This comment was removed by a moderator]</p>
+    {% else %}
+    <p>{{ comment.text|linebreaks }}</p>
+    <button type="button" class="reply-toggle" data-comment-id="{{ comment.pk }}">Reply</button>
+    {% if user == comment.author or user.is_staff %}
+    <a href="{% url 'comment_remove' pk=comment.pk %}" class="comment-delete-link"
+       onclick="return confirm('{% if user == comment.author %}Delete this comment? This can\'t be undone.{% else %}Remove this comment as a moderator?{% endif %}');">
+        {% if user == comment.author %}Delete{% else %}Remove (moderator){% endif %}
+    </a>
+    {% endif %}
+
+    <form method="POST" class="reply-form" id="reply-form-{{ comment.pk }}" style="display:none;">
+        {% csrf_token %}
+        <input type="hidden" name="parent_id" value="{{ comment.pk }}">
+        <textarea name="text" rows="2" placeholder="Reply to {{ comment.author.username }}..." maxlength="1000"
+            required></textarea>
+        <button type="submit">Post reply</button>
+    </form>
+    {% endif %}
+
+    {% if comment.replies.all %}
+    <div class="comment-replies">
+        {% for reply in comment.replies.all %}
+        <div class="comment comment-reply" id="comment-{{ reply.pk }}">
+            <div class="comment-meta">
+                <a href="{% url 'user_profile' username=reply.author.username %}" class="comment-author">{{ reply.author.username }}</a>{% if reply.author.is_staff %}
+                <span class="mod-badge" title="Moderator">[MOD]</span>{% endif %}
+                <time datetime="{{ reply.created_date }}">{{ reply.created_date|date:"M d, Y H:i" }}</time>
+            </div>
+            {% if reply.is_removed %}
+            <p class="removed-notice removed-notice-inline">[This comment was removed by a moderator]</p>
+            {% else %}
+            <p>{{ reply.text|linebreaks }}</p>
+            {% if user == reply.author or user.is_staff %}
+            <a href="{% url 'comment_remove' pk=reply.pk %}" class="comment-delete-link"
+               onclick="return confirm('{% if user == reply.author %}Delete this comment? This can\'t be undone.{% else %}Remove this comment as a moderator?{% endif %}');">
+                {% if user == reply.author %}Delete{% else %}Remove (moderator){% endif %}
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>

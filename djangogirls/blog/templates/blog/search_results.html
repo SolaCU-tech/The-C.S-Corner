@@ -1,0 +1,63 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+
+<h1>
+    {% if query %}Results for "{{ query }}"{% else %}Search{% endif %}
+</h1>
+
+{% if query %}
+<p class="search-summary">{{ results_page.paginator.count }} post result{{ results_page.paginator.count|pluralize }}
+    found.</p>
+{% endif %}
+
+{% if user_results %}
+<section class="post-section">
+    <h2 class="section-heading">People</h2>
+    <div class="user-results-list">
+        {% for match in user_results %}
+        <a href="{% url 'user_profile' username=match.username %}" class="user-result-card">
+            {% if match.profile.avatar %}
+            <img src="{{ match.profile.avatar.url }}" alt="{{ match.username }}" class="user-result-avatar">
+            {% else %}
+            <span class="user-result-avatar user-result-placeholder">{{ match.username|slice:":1"|upper }}</span>
+            {% endif %}
+            <span class="user-result-info">
+                <span class="user-result-username">{{ match.username }}</span>
+                {% if match.profile.display_name %}
+                <span class="user-result-name">{{ match.profile.display_name }}</span>
+                {% endif %}
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if query %}
+<h2 class="section-heading">Posts</h2>
+{% endif %}
+<div class="timeline">
+    {% for post in results_page %}
+    {% include 'blog/_post_entry.html' %}
+    {% empty %}
+    {% if query %}
+    <p class="no-comments">No posts matched "{{ query }}" — try a different term.</p>
+    {% else %}
+    <p class="no-comments">Type something into the search box above to get started.</p>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% if results_page.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="Search result pages">
+    {% if results_page.has_previous %}
+    <a href="?q={{ query }}&page={{ results_page.previous_page_number }}" class="page-link">&larr; Prev</a>
+    {% endif %}
+    <span class="page-status">Page {{ results_page.number }} of {{ results_page.paginator.num_pages }}</span>
+    {% if results_page.has_next %}
+    <a href="?q={{ query }}&page={{ results_page.next_page_number }}" class="page-link">Next &rarr;</a>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% endblock %}

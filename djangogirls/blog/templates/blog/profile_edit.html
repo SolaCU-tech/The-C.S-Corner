@@ -1,0 +1,44 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<h1>Edit your profile</h1>
+<form method="POST" enctype="multipart/form-data" class="post-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <h2 class="section-heading">Profile</h2>
+    <p>
+        {{ form.avatar.label_tag }}
+        {{ form.avatar }}
+        {{ form.avatar.errors }}
+    </p>
+    <p>
+        {{ form.display_name.label_tag }}
+        {{ form.display_name }}
+        {{ form.display_name.errors }}
+    </p>
+    <p>
+        {{ form.real_name.label_tag }}
+        {{ form.real_name }}
+        {{ form.real_name.errors }}
+    </p>
+    <p>
+        {{ form.bio.label_tag }}
+        {{ form.bio }}
+        {{ form.bio.errors }}
+    </p>
+
+    <h2 class="section-heading">Academic info</h2>
+    <p>
+        {{ form.university.label_tag }}
+        {{ form.university }}
+        {{ form.university.errors }}
+    </p>
+    <p>
+        {{ form.current_level.label_tag }}
+        {{ form.current_level }}
+        {{ form.current_level.errors }}
+    </p>
+
+    <button type="submit" class="save btn btn-default">Save</button>
+</form>
+{% endblock %}
