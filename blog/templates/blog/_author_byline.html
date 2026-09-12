@@ -1,0 +1,21 @@
+<span class="author-byline">
+    <a href="{% url 'user_profile' username=post.author.username %}" class="author-link author-hover-trigger">{{ post.author.profile.display_name|default:post.author.username }}{% if post.author.is_staff %}<span
+            class="mod-badge" title="Moderator">[MOD]</span>{% endif %}<span
+            class="author-title-card">
+            {% if post.author.profile.avatar %}
+            <img src="{{ post.author.profile.avatar.url }}" alt="" class="author-title-card-avatar">
+            {% else %}
+            <span class="author-title-card-avatar profile-avatar-placeholder">{{ post.author.username|slice:":1"|upper }}</span>
+            {% endif %}
+            <span class="author-title-card-names">
+                <strong>{{ post.author.profile.display_name|default:post.author.username }}{% if post.author.is_staff %}
+                    <span class="mod-badge" title="Moderator">[MOD]</span>{% endif %}</strong>
+                {% if post.author.profile.real_name %}
+                <span class="author-title-card-realname">{{ post.author.profile.real_name }}</span>
+                {% endif %}
+            </span>
+        </span></a>
+    {% if post.author.profile.real_name %}
+    <span class="author-realname-mobile">{{ post.author.profile.real_name }}</span>
+    {% endif %}
+</span>

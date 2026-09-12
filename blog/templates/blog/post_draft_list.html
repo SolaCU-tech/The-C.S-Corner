@@ -1,0 +1,14 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<h1>Drafts</h1>
+{% for post in posts %}
+<article>
+    <h3><a href="{% url 'post_edit' pk=post.pk %}">{{ post.title }}</a></h3>
+    <time datetime="{{ post.created_date }}">Created {{ post.created_date }}</time>
+    <a href="{% url 'post_remove' pk=post.pk %}"
+       onclick="return confirm('Delete this draft? This can\'t be undone.');">Delete</a>
+</article>
+{% empty %}
+<p>No drafts yet.</p>
+{% endfor %}
+{% endblock %}

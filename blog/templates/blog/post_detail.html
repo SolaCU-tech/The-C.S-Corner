@@ -1,0 +1,217 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<article>
+    <h1>{{ post.title }}</h1>
+    {% if post.is_removed %}
+    <p class="removed-notice">This post was removed by a moderator.</p>
+    {% else %}
+    <time datetime="{{ post.published_date|default:'' }}">
+        {% if post.published_date %}
+        {{ post.published_date|date:"M d, Y" }}
+        {% else %}
+        Draft &mdash; not yet published
+        {% endif %}
+        &middot; by
+        {% include 'blog/_author_byline.html' %}
+    </time>
+    {% if post.image %}
+    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="post-image">
+    {% endif %}
+    <p>{{ post.text|linebreaks }}</p>
+
+    <div class="reaction-bar">
+        <form method="POST" action="{% url 'post_like' pk=post.pk %}" class="reaction-form">
+            {% csrf_token %}
+            <button type="submit" class="reaction-btn {% if user_reaction == 'like' %}reaction-active-like{% endif %}">
+                &#128077; <span>{{ like_count }}</span>
+            </button>
+        </form>
+        <form method="POST" action="{% url 'post_dislike' pk=post.pk %}" class="reaction-form">
+            {% csrf_token %}
+            <button type="submit" class="reaction-btn {% if user_reaction == 'dislike' %}reaction-active-dislike{% endif %}">
+                &#128078; <span>{{ dislike_count }}</span>
+            </button>
+        </form>
+
+        <div class="share-menu">
+            <button type="button" class="reaction-btn share-btn" id="share-btn">&#128279; Share</button>
+            <div class="share-dropdown" id="share-dropdown">
+                <button type="button" class="share-option" id="share-copy-link">Copy link</button>
+                <a href="#" class="share-option" id="share-whatsapp" target="_blank" rel="noopener">Share to
+                    WhatsApp</a>
+            </div>
+        </div>
+    </div>
+
+    {% if likers is not None %}
+    <div class="likers-list">
+        {% if likers %}
+        <span class="likers-label">Liked by:</span>
+        {% for liker in likers %}
+        <a href="{% url 'user_profile' username=liker.username %}" class="likers-name">{{ liker.profile.display_name|default:liker.username }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        {% if likers_total > likers|length %}
+        <span class="likers-more">and {{ likers_total|add:"-30" }} more</span>
+        {% endif %}
+        {% else %}
+        <span class="likers-label">No likes yet.</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if user == post.author %}
+    <a href="{% url 'post_edit' pk=post.pk %}">Edit</a>
+    {% if not post.published_date %}
+    <a href="{% url 'post_publish' pk=post.pk %}">Publish</a>
+    {% endif %}
+    <a href="{% url 'post_remove' pk=post.pk %}"
+       onclick="return confirm('Delete this post? This can\'t be undone.');">Delete</a>
+    {% elif user.is_staff %}
+    <a href="{% url 'post_remove' pk=post.pk %}" class="moderator-action"
+       onclick="return confirm('Remove this post as a moderator? It will show as removed to other users.');">Remove
+        (moderator)</a>
+    {% endif %}
+    {% endif %}
+</article>
+
+{% if not post.is_removed %}
+<section class="comments-section" id="comments">
+    <h2 class="section-heading">Comments ({{ total_comments }})</h2>
+
+    <form method="POST" class="comment-form">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit">Post comment</button>
+    </form>
+
+    <div class="comment-list">
+        {% for comment in comments_page %}
+        {% include 'blog/_comment_thread.html' %}
+        {% empty %}
+        <p class="no-comments">No comments yet — be the first to say something.</p>
+        {% endfor %}
+    </div>
+
+    {% if comments_page.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Comment pages">
+        {% if comments_page.has_previous %}
+        <a href="?page={{ comments_page.previous_page_number }}#comments" class="page-link">&larr; Prev</a>
+        {% endif %}
+        <span class="page-status">Page {{ comments_page.number }} of {{ comments_page.paginator.num_pages }}</span>
+        {% if comments_page.has_next %}
+        <a href="?page={{ comments_page.next_page_number }}#comments" class="page-link">Next &rarr;</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.reaction-form').forEach(function (form) {
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            var button = form.querySelector('.reaction-btn');
+            var forms = document.querySelectorAll('.reaction-form');
+            button.disabled = true;
+
+            try {
+                var response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Reaction request failed: ' + response.status);
+                }
+
+                var data = await response.json();
+                var likeForm = document.querySelector('form[action$="/like/"]');
+                var dislikeForm = document.querySelector('form[action$="/dislike/"]');
+
+                if (likeForm) {
+                    likeForm.querySelector('span').textContent = data.like_count;
+                    likeForm.querySelector('.reaction-btn').classList.toggle(
+                        'reaction-active-like', data.user_reaction === 'like');
+                }
+
+                if (dislikeForm) {
+                    dislikeForm.querySelector('span').textContent = data.dislike_count;
+                    dislikeForm.querySelector('.reaction-btn').classList.toggle(
+                        'reaction-active-dislike', data.user_reaction === 'dislike');
+                }
+            } catch (error) {
+                console.error('Could not update reaction:', error);
+            } finally {
+                forms.forEach(function (reactionForm) {
+                    reactionForm.querySelector('.reaction-btn').disabled = false;
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.reply-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var form = document.getElementById('reply-form-' + btn.dataset.commentId);
+            if (!form) return;
+            var visible = form.style.display !== 'none';
+            document.querySelectorAll('.reply-form').forEach(function (f) { f.style.display = 'none'; });
+            form.style.display = visible ? 'none' : 'block';
+            if (!visible) form.querySelector('textarea').focus();
+        });
+    });
+
+    (function () {
+        var shareBtn = document.getElementById('share-btn');
+        var dropdown = document.getElementById('share-dropdown');
+        var copyBtn = document.getElementById('share-copy-link');
+        var whatsappLink = document.getElementById('share-whatsapp');
+        if (!shareBtn || !dropdown) return;
+
+        var postUrl = window.location.href;
+        var postTitle = document.querySelector('article h1').textContent.trim();
+        whatsappLink.href = 'https://wa.me/?text=' +
+            encodeURIComponent(postTitle + ' ' + postUrl);
+
+        shareBtn.addEventListener('click', function (event) {
+            event.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!dropdown.contains(event.target) && event.target !== shareBtn) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        copyBtn.addEventListener('click', async function () {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(postUrl);
+                } else {
+                    var temp = document.createElement('textarea');
+                    temp.value = postUrl;
+                    temp.style.position = 'fixed';
+                    temp.style.opacity = '0';
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(temp);
+                }
+                var original = copyBtn.textContent;
+                copyBtn.textContent = 'Copied!';
+                setTimeout(function () { copyBtn.textContent = original; }, 1500);
+            } catch (error) {
+                console.error('Could not copy link:', error);
+            }
+        });
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+Django~=5.2.12
+Pillow
+requests
+gunicorn
+whitenoise
+dj-database-url
+psycopg2-binary
+django-cloudinary-storage
+cloudinary
+python-dotenv
