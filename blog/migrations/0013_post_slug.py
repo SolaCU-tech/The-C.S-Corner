@@ -35,11 +35,34 @@ class Migration(migrations.Migration):
         ),
         # Step 2: give every existing post a real, unique slug.
         migrations.RunPython(backfill_slugs, noop_reverse),
-        # Step 3: now that every row has a unique value, it's safe to
-        # enforce uniqueness going forward.
+        # Step 3: drop nullability, as its own change.
         migrations.AlterField(
             model_name='post',
             name='slug',
-            field=models.SlugField(blank=True, max_length=220, unique=True),
+            field=models.SlugField(blank=True, max_length=220, null=False),
+        ),
+        # Step 4: add the uniqueness constraint. Written as raw SQL
+        # rather than a normal AlterField — Django's own SQL generator
+        # for this exact field/change combination on Postgres emits a
+        # genuine duplicate CREATE INDEX statement (confirmed directly
+        # via `sqlmigrate`, not a leftover-state issue). The unique
+        # constraint below gets its own backing index automatically,
+        # same as Django's normal behavior; the extra pattern-matching
+        # index Django tries to add isn't needed since nothing in this
+        # app queries slug with __startswith/__contains.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterField(
+                    model_name='post',
+                    name='slug',
+                    field=models.SlugField(blank=True, max_length=220, unique=True),
+                ),
+            ],
+            database_operations=[
+                migrations.RunSQL(
+                    sql='ALTER TABLE "blog_post" ADD CONSTRAINT "blog_post_slug_b95473f2_uniq" UNIQUE ("slug");',
+                    reverse_sql='ALTER TABLE "blog_post" DROP CONSTRAINT "blog_post_slug_b95473f2_uniq";',
+                ),
+            ],
         ),
     ]
