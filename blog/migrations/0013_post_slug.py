@@ -60,8 +60,8 @@ class Migration(migrations.Migration):
             ],
             database_operations=[
                 migrations.RunSQL(
-                    sql='ALTER TABLE "blog_post" ADD CONSTRAINT "blog_post_slug_b95473f2_uniq" UNIQUE ("slug");',
-                    reverse_sql='ALTER TABLE "blog_post" DROP CONSTRAINT "blog_post_slug_b95473f2_uniq";',
+                    sql='CREATE UNIQUE INDEX "blog_post_slug_uniq_idx" ON "blog_post" ("slug");',
+                    reverse_sql='DROP INDEX "blog_post_slug_uniq_idx";',
                 ),
             ],
         ),

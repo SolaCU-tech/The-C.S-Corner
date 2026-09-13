@@ -104,7 +104,6 @@ def post_draft_list(request):
     return render(request, 'blog/post_draft_list.html', {'posts': posts})
 
 
-@login_required
 def post_detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
 
@@ -112,6 +111,8 @@ def post_detail(request, slug):
         raise Http404("Post not found")
 
     if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect(f"{reverse('login')}?next={request.path}")
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
@@ -141,7 +142,21 @@ def post_detail(request, slug):
         form = CommentForm()
         Post.objects.filter(pk=post.pk).update(view_count=F('view_count') + 1)
         post.refresh_from_db()
-        PostRead.objects.get_or_create(user=request.user, post=post)
+        if request.user.is_authenticated:
+            PostRead.objects.get_or_create(user=request.user, post=post)
+
+    # Guests get a teaser (title + snippet + sign-up prompt), matching
+    # the same pattern already used on the homepage feed — no comments,
+    # reactions, or full text until they have an account. This also
+    # means anonymous crawlers (link-preview bots for WhatsApp,
+    # Telegram, etc.) can actually reach this page and read its real
+    # meta tags, instead of being redirected to the login page first.
+    if not request.user.is_authenticated:
+        return render(request, 'blog/post_detail.html', {
+            'post': post,
+            'og_description': truncatewords(post.text, 30),
+            'og_image_url': _absolute_media_url(request, post.image.url) if post.image else '',
+        })
 
     top_level_qs = post.comments.filter(parent__isnull=True) \
         .select_related('author') \

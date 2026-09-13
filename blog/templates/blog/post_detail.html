@@ -42,6 +42,8 @@
     {% if post.image %}
     <img src="{{ post.image.url }}" alt="{{ post.title }}" class="post-image">
     {% endif %}
+
+    {% if user.is_authenticated %}
     <p>{{ post.text|linebreaks }}</p>
 
     <div class="reaction-bar">
@@ -100,10 +102,31 @@
        onclick="return confirm('Remove this post as a moderator? It will show as removed to other users.');">Remove
         (moderator)</a>
     {% endif %}
+
+    {% else %}
+    <p>{{ og_description }}</p>
+    <div class="guest-banner">
+        You're browsing as a guest — you can read a snippet above, but reading the full post needs an account.
+        <a href="{% url 'signup' %}">Sign up</a> or <a href="{% url 'login' %}?next={{ request.path }}">log in</a>
+        to keep reading.
+    </div>
+    <p class="post-actions">
+        <span class="share-menu">
+            <button type="button" class="share-btn" id="share-btn" data-snippet="{{ og_description }}">Share</button>
+            <span class="share-dropdown" id="share-dropdown">
+                <button type="button" class="share-option" id="share-copy-link">Copy link</button>
+                <a href="#" class="share-option" id="share-whatsapp" target="_blank" rel="noopener">Share to
+                    WhatsApp</a>
+                <a href="#" class="share-option" id="share-telegram" target="_blank" rel="noopener">Share to
+                    Telegram</a>
+            </span>
+        </span>
+    </p>
+    {% endif %}
     {% endif %}
 </article>
 
-{% if not post.is_removed %}
+{% if not post.is_removed and user.is_authenticated %}
 <section class="comments-section" id="comments">
     <h2 class="section-heading">Comments ({{ total_comments }})</h2>
 
